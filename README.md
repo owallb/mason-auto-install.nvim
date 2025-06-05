@@ -1,6 +1,6 @@
 # mason-auto-install
 
-Automatically install Mason packages on demand based on file types.
+Automatically install [Mason](https://github.com/mason-org/mason.nvim) packages on demand based on file types.
 
 ## Overview
 
@@ -11,7 +11,7 @@ Instead of pre-installing all LSP servers, formatters, and linters, `mason-auto-
 - **On-demand installation**: Packages are installed only when files of relevant types are opened
 - **Dependency management**: Automatically install package dependencies
 - **Version pinning**: Lock packages to specific versions
-- **Post-install hooks**: Run shell commands or Lua functions after package installation
+- **Post-install hooks**: Run shell commands or functions after package installation
 - **LSP integration**: Automatically restart LSP clients after updates
 
 ## Installation
@@ -86,11 +86,11 @@ require('mason-auto-install').setup({
             }
         },
         
-        -- Package with Lua function hooks
+        -- Package with function hooks
         {
             name = 'typescript-language-server',
             post_install_hooks = {
-                -- Lua functions receive the package instance
+                -- functions receive the package instance
                 function(pkg)
                     print("Installed " .. pkg.name .. " version " .. pkg.version)
                     -- Return false to indicate failure, true/nil for success
@@ -113,7 +113,7 @@ require('mason-auto-install').setup({
             post_install_hooks = {
                 -- Shell command
                 { 'rustup', 'component', 'add', 'rust-analyzer' },
-                -- Lua function
+                -- function
                 function(pkg)
                     vim.notify("Rust Analyzer setup complete!")
                     return true
@@ -140,7 +140,7 @@ Each package can be configured with the following options:
 
 ### Post-Install Hooks
 
-Post-install hooks can be either shell commands or Lua functions:
+Post-install hooks can be either shell commands or functions:
 
 #### Shell Commands
 - Must be arrays of strings (command + arguments)
@@ -154,7 +154,7 @@ post_install_hooks = {
 }
 ```
 
-#### Lua Functions
+#### Functions
 - Receive the package instance as parameter
 - Return `false` to indicate failure, `true` or `nil` for success
 - Can access package properties like `name`, `version`, etc.
@@ -203,7 +203,7 @@ dependencies = {
    - Check error output in notifications
    - Ensure commands are in PATH or use full paths
 
-   Lua functions:
+   Functions:
    - Should return boolean values (true/false/nil)
    - Use `pcall()` for error handling in complex functions
 4. **LSP not restarting**: The plugin only restarts LSPs for packages that provide lspconfig integration. Manual restart may be needed for some packages.
