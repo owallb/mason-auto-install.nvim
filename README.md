@@ -20,7 +20,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 
 ```lua
 {
-    'owallb/mason-auto-install',
+    'owallb/mason-auto-install.nvim',
     dependencies = {
         'williamboman/mason.nvim',
     },
