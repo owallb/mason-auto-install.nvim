@@ -89,31 +89,45 @@ function M:run_post_install_hooks(on_done)
             end)
         elseif util.is_list(hook, "string") then
             local cmd = hook
-            vim.system(cmd, { cwd = cwd }, function(resp)
-                if resp.code ~= 0 then
-                    local stdout = ""
-                    if resp.stdout then
-                        stdout = "\nstdout:\n" .. resp.stdout
+            local ok, resp = pcall(
+                vim.system,
+                cmd,
+                { cwd = cwd },
+                function(resp)
+                    if resp.code ~= 0 then
+                        local msg = table.concat(cmd, " ")
+
+                        if resp.stdout and resp.stdout ~= "" then
+                            msg = msg .. "\n" .. resp.stdout
+                        end
+
+                        if resp.stderr and resp.stderr ~= "" then
+                            msg = msg .. "\n" .. resp.stderr
+                        end
+
+                        log.error(
+                            "Command failed with non-zero exit status (%d): %s",
+                            resp.code,
+                            msg
+                        )
                     end
 
-                    local stderr = ""
-                    if resp.stderr then
-                        stderr = "\nstderr:\n" .. resp.stderr
-                    end
+                    vim.schedule(function()
+                        on_hook_complete(resp.code == 0)
+                    end)
+                end
+            )
 
-                    log.error(
-                        "command failed with non-zero exit status (%d): %s%s%s",
-                        resp.code,
-                        table.concat(cmd, " "),
-                        stdout,
-                        stderr
-                    )
+            if not ok then
+                local msg = table.concat(cmd, " ")
+
+                if resp and resp ~= "" then
+                    msg = msg .. "\n" .. resp
                 end
 
-                vim.schedule(function()
-                    on_hook_complete(resp.code == 0)
-                end)
-            end)
+                log.error("Failed to run command: %s", msg)
+                on_hook_complete(false)
+            end
         end
     end
 end
