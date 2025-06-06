@@ -224,7 +224,7 @@ end
 ---@param on_done? fun(success: boolean, was_updated: boolean) Called when everything is complete
 function M:ensure_all(on_done)
     registry.refresh(function()
-        if self.dependencies and #self.dependencies ~= 0 then
+        if self.dependencies and #self.dependencies > 0 then
             -- Install dependencies first
             self:ensure_dependencies(function(deps_success, deps_was_updated)
                 if deps_success then

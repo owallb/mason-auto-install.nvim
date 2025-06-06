@@ -121,7 +121,7 @@ function M.setup(opts)
     for _, pkg in ipairs(packages) do
         local ft
         -- Use package-specific filetypes if defined, otherwise trigger on any
-        if #pkg.filetypes ~= 0 then
+        if #pkg.filetypes > 0 then
             ft = pkg.filetypes
         end
 
