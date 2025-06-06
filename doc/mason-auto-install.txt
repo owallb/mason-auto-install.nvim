@@ -58,7 +58,8 @@ Options ~
 
                                           *mason-auto-install-config-packages*
 packages ~
-    Type: `(string|table)[]`
+    Type: `(string|MasonAutoInstall.Package.Config)[]`
+    Required: No
     Default: `{}`
     
     List of packages to manage. Each entry can be a string (package name) or
@@ -68,26 +69,31 @@ packages ~
 Package Configuration ~
 
     [1] or name ~
-        Type: `string` (required)
+        Type: `string`
+        Required: Yes
         Mason package name as it appears in the registry.
 
     version ~
-        Type: `string` (optional)
+        Type: `string`
+        Required: No
         Default: Latest version
         Specific version to install.
 
     filetypes ~
-        Type: `string[]` (optional)
+        Type: `string[]`
+        Required: No
         Default: LSP filetypes if available, otherwise triggers on any filetype
         File types that trigger installation.
 
     dependencies ~
-        Type: `(string|table)[]` (optional)
+        Type: `(string|MasonAutoInstall.Package.Config)[]`
+        Required: No
         Default: `{}`
         Other packages this package depends on.
 
     post_install_hooks ~
-        Type: `(function|string[])[]` (optional)
+        Type: `(fun(pkg: MasonAutoInstall.Package): boolean?|string[])[]`
+        Required: No
         Default: `{}`
         Functions or shell commands to run after installation.
 
