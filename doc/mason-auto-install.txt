@@ -18,88 +18,125 @@ CONTENTS                                         *mason-auto-install-contents*
 ==============================================================================
 1. INTRODUCTION                                     *mason-auto-install-intro*
 
-mason-auto-install automatically installs Mason packages when you open files
-of specific types. Instead of pre-installing all LSP servers and tools,
-packages are installed only when needed, triggered by FileType autocmds.
+Automatically install and update Mason packages.
 
 Features: ~
-  - On-demand installation based on file types
-  - Dependency management between packages  
-  - Automatic LSP client restart after updates
-  - Post-installation hooks (shell commands and Lua functions)
-  - Version pinning support
+  - On-demand installation: Packages are installed only when buffers of
+    relevant filetypes are opened
+  - Automatic updates: Keeps packages updated
+  - Version pinning: Lock packages to specific versions to avoid undesired
+    updates
+  - Post-install hooks: Run shell commands or functions after package
+    installation
+  - LSP integration: Automatically restart any LSP clients after updates
 
 ==============================================================================
-2. SETUP                                            *mason-auto-install-setup*
+2. CONFIGURATION                                   *mason-auto-install-config*
 
-Requires mason.nvim to be installed and configured first.
-
-Basic setup: ~
+Example ~
 >lua
     require('mason-auto-install').setup({
         packages = {
-            -- Simple package names (installs latest version)
             'lua_ls',
-            'stylua',
-            'prettier'
+            { 'stylua', version = '0.20.0' },
+            {
+                'typescript-language-server',
+                dependencies = { 'prettier' },
+                post_install_hooks = {
+                    function(pkg)
+                        print("Installed " .. pkg.name)
+                        return true
+                    end,
+                    { 'npm', 'install', '-g', '@types/node' }
+                }
+            }
         }
     })
 <
 
-==============================================================================
-3. CONFIGURATION                                   *mason-auto-install-config*
+Options ~
 
                                           *mason-auto-install-config-packages*
 packages ~
-    Type: `(string|MasonAutoInstall.Package.Config)[]`
+    Type: `(string|table)[]`
     Default: `{}`
     
-    List of packages to manage. Each entry can be:
-    - A string (package name) for simple cases
-    - A table with detailed configuration
+    List of packages to manage. Each entry can be a string (package name) or
+    a table with detailed configuration.
 
-Package Configuration: ~
-                                           *mason-auto-install-package-config*
-    Each package table can contain:
+                                            *mason-auto-install-package-config*
+Package Configuration ~
 
-    name ~
-        Type: `string`
-        Required: Yes
-        The Mason package name as it appears in the registry.
+    [1] or name ~
+        Type: `string` (required)
+        Mason package name as it appears in the registry.
 
     version ~
-        Type: `string`
-        Required: No
+        Type: `string` (optional)
         Default: Latest version
-        Specific version to install. Can be a version number or tag.
+        Specific version to install.
 
     filetypes ~
-        Type: `string[]`
-        Required: No
-        Default: LSP filetypes if package provides LSP, otherwise empty
-        File types that trigger installation of this package.
+        Type: `string[]` (optional)
+        Default: LSP filetypes if available, otherwise triggers on any filetype
+        File types that trigger installation.
 
     dependencies ~
-        Type: `(string|MasonAutoInstall.Package.Config)[]`
-        Required: No
+        Type: `(string|table)[]` (optional)
         Default: `{}`
-        Other packages this package depends on. Can be strings (package names)
-        or tables (full package configurations). Will be installed first.
+        Other packages this package depends on.
 
     post_install_hooks ~
-        Type: `(fun(pkg: MasonAutoInstall.Package): boolean?|string[])[]`
-        Required: No
+        Type: `(function|string[])[]` (optional)
         Default: `{}`
-        Lua functions or shell commands to run after installation.
+        Functions or shell commands to run after installation.
+
+==============================================================================
+3. DEPENDENCIES                              *mason-auto-install-dependencies*
+
+Dependencies are treated the same as any package and can be configured in the
+same way. The only difference is they will be handled before the packages that
+depend on them. It is useful for grouping related packages together, and even
+works on multiple levels:
+>lua
+    {
+        'typescript-language-server',
+        dependencies = {
+            'prettier',
+            'eslint_d',
+            {
+                'tailwindcss-language-server',
+                version = "0.14.20",
+                dependencies = {
+                    'css-lsp',
+                    'html-lsp'
+                }
+            }
+        }
+    }
+<
 
 ==============================================================================
 4. POST-INSTALL HOOKS                               *mason-auto-install-hooks*
 
-Post-install hooks allow you to run additional setup after package
-installation. Two types are supported:
+Post-install hooks can be either shell commands or functions:
 
-Lua Functions: ~
-    Lua functions receive the package instance as a parameter and can perform
+Shell Commands: ~
+    Shell commands are specified as arrays of strings (command + arguments).
+    They run in the package's installation directory.
+    
+    Example:
+>lua
+        post_install_hooks = {
+            { 'npm', 'install', '-g', 'some-package' },
+            { 'pip', 'install', 'additional-tool' }
+        }
+<
+    
+    Success/failure is determined by the exit code (0 = success).
+
+Functions: ~
+    Functions receive the package instance as a parameter and can perform
     custom setup logic.
     
     Example:
@@ -118,22 +155,8 @@ Lua Functions: ~
     - `false` to indicate failure
     - `nil` (or nothing) defaults to success
 
-Shell Commands: ~
-    Shell commands are specified as arrays of strings (command + arguments).
-    They run in the package's installation directory.
-    
-    Example:
->lua
-        post_install_hooks = {
-            { 'npm', 'install', '-g', 'some-package' },
-            { 'pip', 'install', 'additional-tool' }
-        }
-<
-    
-    Success/failure is determined by the exit code (0 = success).
-
 Mixed Hooks: ~
-    You can mix shell commands and Lua functions in the same package:
+    You can mix shell commands and functions in the same package:
 >lua
         post_install_hooks = {
             { 'npm', 'install', '-g', '@types/node' },
@@ -161,140 +184,4 @@ setup({opts})                                     *mason-auto-install.setup()*
 <
 
 ==============================================================================
-6. EXAMPLES                                      *mason-auto-install-examples*
-
-Basic Configuration: ~
->lua
-    require('mason-auto-install').setup({
-        packages = {
-            -- Simple package names (installs latest version)
-            'lua_ls',
-            'stylua',
-            'prettier',
-        }
-    })
-<
-
-Advanced Configuration: ~
->lua
-    require('mason-auto-install').setup({
-        packages = {
-            -- Simple package
-            'lua_ls',
-            
-            -- Package with specific version
-            {
-                'stylua',
-                version = '0.20.0'
-            },
-            
-            -- Package with custom filetypes
-            {
-                'prettier',
-                filetypes = { 'javascript', 'typescript', 'json', 'markdown' }
-            },
-            
-            -- Package with dependencies
-            {
-                'rust_analyzer',
-                dependencies = {
-                    'codelldb',
-                    { 'cargo', version = 'latest' }
-                }
-            },
-            
-            -- Package with shell command hooks
-            {
-                name = 'pyright',
-                post_install_hooks = {
-                    -- Shell commands run in package directory
-                    { 'pip', 'install', '--upgrade', 'python-lsp-server' },
-                    { 'pip', 'install', 'black', 'isort' }
-                }
-            },
-            
-            -- Package with Lua function hooks
-            {
-                name = 'typescript-language-server',
-                post_install_hooks = {
-                    -- Lua functions receive the package instance
-                    function(pkg)
-                        print("Installed " .. pkg.name .. " version " .. pkg.version)
-                        -- Return false to indicate failure, true/nil for success
-                        return true
-                    end,
-                    -- Mix shell commands and functions
-                    { 'npm', 'install', '-g', '@types/node' }
-                }
-            },
-            
-            -- Complex example with everything
-            {
-                name = 'rust_analyzer',
-                version = '2024-01-01',
-                filetypes = { 'rust' },
-                dependencies = {
-                    'codelldb',
-                    { name = 'cargo', version = 'latest' }
-                },
-                post_install_hooks = {
-                    -- Shell command
-                    { 'rustup', 'component', 'add', 'rust-analyzer' },
-                    -- Lua function
-                    function(pkg)
-                        vim.notify("Rust Analyzer setup complete!")
-                        return true
-                    end
-                }
-            }
-        }
-    })
-<
-
-==============================================================================
-7. TROUBLESHOOTING                        *mason-auto-install-troubleshooting*
-
-Common Issues: ~
-
-Package not found ~
-    Ensure the package name matches exactly what's in the Mason registry.
-    Check available packages with `:Mason`.
-
-Version conflicts ~
-    Check that the specified version exists for the package.
-    Use `:MasonLog` to see installation details.
-
-Post-install hooks failing ~
-    Shell commands:
-    - Run in the package installation directory
-    - Check error output in notifications
-    - Ensure commands are in PATH or use full paths
-    
-    Lua functions:
-    - Should return boolean values (true/false/nil)
-    - Use `pcall()` for error handling in complex functions
-
-LSP not restarting ~
-    The plugin only restarts LSPs for packages that provide lspconfig
-    integration. Manual restart may be needed for some packages.
-
-Debugging: ~
-    Enable Mason debug logging:
->lua
-        require('mason').setup({
-            log_level = vim.log.levels.DEBUG
-        })
-<
-
-    Check Mason registry:
->vim
-        :Mason
-<
-
-    View Mason logs:
->vim
-        :MasonLog
-<
-
-==============================================================================
- vim:tw=78:ts=8:noet:ft=help:norl:
+ vim:tw=78:ts=8:et:ft=help:norl:
