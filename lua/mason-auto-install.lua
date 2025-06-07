@@ -1,5 +1,6 @@
 local Package = require("mason-auto-install.package")
 local log = require("mason-auto-install.log")
+local registry = require("mason-registry")
 
 local M = {}
 
@@ -101,44 +102,47 @@ function M.setup(opts)
     -- Merge user config with defaults
     config = vim.tbl_deep_extend("force", config, opts)
 
-    -- Create Package instances from configuration
-    packages = {}
-    for i, pkg_opts in ipairs(config.packages) do
-        local pkg
-        pkg, err = Package.new(pkg_opts)
-        if pkg then
-            table.insert(packages, pkg)
-        else
-            log.error("Failed to create package [%d]: %s", i, err)
-        end
-    end
-
-    -- Create autocommand group (clear existing to allow reloading)
-    local group =
-        vim.api.nvim_create_augroup("MasonAutoInstall", { clear = true })
-
-    -- Set up FileType autocmds for each package
-    for _, pkg in ipairs(packages) do
-        local ft
-        -- Use package-specific filetypes if defined, otherwise trigger on any
-        if #pkg.filetypes > 0 then
-            ft = pkg.filetypes
+    registry.refresh(function()
+        -- Create Package instances from configuration
+        packages = {}
+        for i, pkg_opts in ipairs(config.packages) do
+            local pkg
+            pkg, err = Package.new(pkg_opts)
+            if pkg then
+                table.insert(packages, pkg)
+            else
+                log.error("Failed to create package [%d]: %s", i, err)
+            end
         end
 
-        vim.api.nvim_create_autocmd("FileType", {
-            group = group,
-            pattern = ft,
-            once = true,
-            callback = function()
-                -- Install package and dependencies, restart LSP if updated
-                pkg:ensure_all(function(success, was_updated)
-                    if success and was_updated then
-                        restart_lsp_clients(pkg)
-                    end
-                end)
-            end,
-        })
-    end
+        -- Create autocommand group (clear existing to allow reloading)
+        local group =
+            vim.api.nvim_create_augroup("MasonAutoInstall", { clear = true })
+
+        -- Set up FileType autocmds for each package
+        for _, pkg in ipairs(packages) do
+            local ft
+            -- Use package-specific filetypes if defined, otherwise trigger on
+            -- any filetypes
+            if #pkg.filetypes > 0 then
+                ft = pkg.filetypes
+            end
+
+            vim.api.nvim_create_autocmd("FileType", {
+                group = group,
+                pattern = ft,
+                once = true,
+                callback = function()
+                    -- Install package and dependencies, restart LSP if updated
+                    pkg:ensure_all(function(success, was_updated)
+                        if success and was_updated then
+                            restart_lsp_clients(pkg)
+                        end
+                    end)
+                end,
+            })
+        end
+    end)
 end
 
 return M

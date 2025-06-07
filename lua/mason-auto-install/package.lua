@@ -231,33 +231,27 @@ function M:ensure_dependencies(on_done)
 end
 
 --- Ensure package and all dependencies are installed
---- This is the main entry point for package installation. It:
---- 1. Refreshes the Mason registry
---- 2. Installs all dependencies first
---- 3. Installs the main package
 ---@param on_done? fun(success: boolean, was_updated: boolean) Called when everything is complete
 function M:ensure_all(on_done)
-    registry.refresh(function()
-        if self.dependencies and #self.dependencies > 0 then
-            -- Install dependencies first
-            self:ensure_dependencies(function(deps_success, deps_was_updated)
-                if deps_success then
-                    -- Dependencies succeeded, install main package
-                    self:ensure_installed(function(success, was_updated)
-                        if on_done then
-                            on_done(success, deps_was_updated or was_updated)
-                        end
-                    end)
-                elseif on_done then
-                    -- Dependencies failed, don't install main package
-                    on_done(false, deps_was_updated)
-                end
-            end)
-        else
-            -- No dependencies, install main package directly
-            self:ensure_installed(on_done)
-        end
-    end)
+    if self.dependencies and #self.dependencies > 0 then
+        -- Install dependencies first
+        self:ensure_dependencies(function(deps_success, deps_was_updated)
+            if deps_success then
+                -- Dependencies succeeded, install main package
+                self:ensure_installed(function(success, was_updated)
+                    if on_done then
+                        on_done(success, deps_was_updated or was_updated)
+                    end
+                end)
+            elseif on_done then
+                -- Dependencies failed, don't install main package
+                on_done(false, deps_was_updated)
+            end
+        end)
+    else
+        -- No dependencies, install main package directly
+        self:ensure_installed(on_done)
+    end
 end
 
 --- Validate package configuration
