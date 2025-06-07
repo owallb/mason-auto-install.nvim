@@ -178,11 +178,9 @@ function M:install(on_done)
                     end
                 else
                     log.info("Successfully installed %s", self.name)
-                    self:run_post_install_hooks(function(success)
-                        if on_done then
-                            on_done(success, was_updated)
-                        end
-                    end)
+                    if on_done then
+                        on_done(true, was_updated)
+                    end
                 end
             end)
         )
@@ -193,7 +191,17 @@ end
 ---@param on_done? fun(success: boolean, was_updated: boolean) Called when check/installation completes
 function M:ensure_installed(on_done)
     if self.mason:get_installed_version() ~= self.version then
-        self:install(on_done)
+        self:install(function(success, was_updated)
+            if success and was_updated then
+                self:run_post_install_hooks(function(hooks_success)
+                    if on_done then
+                        on_done(hooks_success, was_updated)
+                    end
+                end)
+            elseif on_done then
+                on_done(success, was_updated)
+            end
+        end)
     elseif on_done then
         on_done(true, false)
     end
