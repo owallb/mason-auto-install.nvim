@@ -55,9 +55,8 @@ end
 ---@param opts MasonAutoInstall.Config
 ---@return string? error message on failure
 function M.validate(opts)
-    local ok, err = pcall(vim.validate, {
-        packages = { opts.packages, "table", true },
-    })
+    local ok, err =
+        pcall(vim.validate, "packages", opts.packages, "table", true)
 
     if not ok then
         return err
