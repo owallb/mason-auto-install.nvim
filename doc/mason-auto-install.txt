@@ -148,6 +148,7 @@ Functions: ~
     Example:
 >lua
         post_install_hooks = {
+            ---@param pkg MasonAutoInstall.Package
             function(pkg)
                 print("Setting up " .. pkg.name)
                 -- Your custom logic here
@@ -166,6 +167,7 @@ Mixed Hooks: ~
 >lua
         post_install_hooks = {
             { 'npm', 'install', '-g', '@types/node' },
+            ---@param pkg MasonAutoInstall.Package
             function(pkg)
                 vim.notify("TypeScript setup complete!")
                 return true
@@ -179,10 +181,10 @@ Mixed Hooks: ~
 setup({opts})                                     *mason-auto-install.setup()*
     Setup the mason-auto-install plugin.
     
-    Parameters: ~
+    Parameters:
         {opts} (`MasonAutoInstall.Config`) See |mason-auto-install-config|.
     
-    Usage: ~
+    Usage:
 >lua
         require('mason-auto-install').setup({
             packages = { 'lua_ls', 'stylua' }

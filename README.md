@@ -140,13 +140,14 @@ post_install_hooks = {
 You can mix shell commands and functions in the same package:
 
 ```lua
-        post_install_hooks = {
-            { 'npm', 'install', '-g', '@types/node' },
-            function(pkg)
-                vim.notify("TypeScript setup complete!")
-                return true
-            end
-        }
+post_install_hooks = {
+    { 'npm', 'install', '-g', '@types/node' },
+    ---@param pkg MasonAutoInstall.Package
+    function(pkg)
+        vim.notify("TypeScript setup complete!")
+        return true
+    end
+}
 ```
 
 ## Contributing
