@@ -12,7 +12,7 @@ Automatically install and update
   updates
 - **Post-install hooks**: Run shell commands or functions after package
   installation
-- **LSP integration**: Automatically restart any LSP clients after updates
+- **LSP integration**: Retrieves filetypes automatically from LSP configuration, if available. Automatically restart any LSP clients after updates
 
 ## Installation
 
