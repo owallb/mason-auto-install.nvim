@@ -22,7 +22,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 {
     'owallb/mason-auto-install.nvim',
     dependencies = {
-        'williamboman/mason.nvim',
+        'mason-org/mason.nvim',
         -- Optional: LSP configurations in `vim.lsp.config` needs to be loaded
         -- first to find associated filetypes automatically. If you use
         -- lspconfig for that, add it as a dependency.
