@@ -34,6 +34,24 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 }
 ```
 
+Using [vim.pack (Neovim 0.12+)](https://neovim.io/doc/user/pack/#_plugin-manager):
+
+```lua
+vim.pack.add({
+    'https://github.com/mason-org/mason.nvim',
+    -- Optional: LSP configurations in `vim.lsp.config` needs to be loaded
+    -- first to find associated filetypes automatically. If you use
+    -- lspconfig for that, add it as a dependency.
+    'https://github.com/neovim/nvim-lspconfig',
+    'https://github.com/owallb/mason-auto-install.nvim',
+})
+
+require('mason').setup()
+require('mason-auto-install').setup({
+    packages = { 'lua-language-server', 'stylua', 'prettier' },
+})
+```
+
 ## Configuration
 
 ### Example
