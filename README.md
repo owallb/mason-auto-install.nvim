@@ -29,7 +29,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
         'neovim/nvim-lspconfig',
     },
     opts = {
-        packages = { 'lua_ls', 'stylua', 'prettier' }
+        packages = { 'lua-language-server', 'stylua', 'prettier' }
     },
 }
 ```
@@ -41,7 +41,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 ```lua
 require('mason-auto-install').setup({
     packages = {
-        'lua_ls',
+        'lua-language-server',
         { 'stylua', version = '0.20.0' },
         {
             'typescript-language-server',
