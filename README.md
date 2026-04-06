@@ -62,7 +62,11 @@ require('mason-auto-install').setup({
 
 #### packages
 
-List of packages to manage. Each entry can be a string (package name) or a table with detailed configuration.
+List of packages to manage.
+
+Each entry can be a string (package name) or a table with detailed configuration.
+
+The package name must be as it appears in the Mason Registry. So instead of `lua_ls`, you use `lua-language-server`.
 
 #### Package Configuration
 
