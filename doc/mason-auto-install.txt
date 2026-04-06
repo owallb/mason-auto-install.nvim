@@ -37,7 +37,7 @@ Example ~
 >lua
     require('mason-auto-install').setup({
         packages = {
-            'lua_ls',
+            'lua-langauge-server',
             { 'stylua', version = '0.20.0' },
             {
                 'typescript-language-server',
@@ -62,8 +62,9 @@ packages ~
     Required: No
     Default: `{}`
     
-    List of packages to manage. Each entry can be a string (package name) or
-    a table with detailed configuration.
+    List of packages to manage. Each entry can be a string (package name) or a
+    table with detailed configuration. The package name must be as it appears
+    in the Mason Registry. So instead of `lua_ls`, you use `lua-language-server`.
 
                                             *mason-auto-install-package-config*
 Package Configuration ~
@@ -187,7 +188,7 @@ setup({opts})                                     *mason-auto-install.setup()*
     Usage:
 >lua
         require('mason-auto-install').setup({
-            packages = { 'lua_ls', 'stylua' }
+            packages = { 'lua-langauge-server', 'stylua' }
         })
 <
 
