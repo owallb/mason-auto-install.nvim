@@ -29,7 +29,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
         'neovim/nvim-lspconfig',
     },
     opts = {
-        packages = { 'lua_ls', 'stylua', 'prettier' }
+        packages = { 'lua-language-server', 'stylua', 'prettier' }
     },
 }
 ```
@@ -41,7 +41,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 ```lua
 require('mason-auto-install').setup({
     packages = {
-        'lua_ls',
+        'lua-language-server',
         { 'stylua', version = '0.20.0' },
         {
             'typescript-language-server',
@@ -62,7 +62,11 @@ require('mason-auto-install').setup({
 
 #### packages
 
-List of packages to manage. Each entry can be a string (package name) or a table with detailed configuration.
+List of packages to manage.
+
+Each entry can be a string (package name) or a table with detailed configuration.
+
+The package name must be as it appears in the Mason Registry. So instead of `lua_ls`, you use `lua-language-server`.
 
 #### Package Configuration
 
