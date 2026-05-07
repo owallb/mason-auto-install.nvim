@@ -347,7 +347,7 @@ function M.validate(opts)
         local name = spec.field
         local ok, err = pcall(
             vim.validate,
-            name,
+            tostring(name),
             opts[spec.field],
             spec.validator,
             spec.optional,
@@ -375,7 +375,7 @@ end
 function M.new(opts)
     -- Handle shorthand string format
     if type(opts) == "string" then
-        opts = { opts }
+        opts = { opts } --[[@as MasonAutoInstall.Package.Config]]
     elseif type(opts) ~= "table" then
         return nil, "expected string or table, got " .. type(opts)
     end
@@ -419,7 +419,10 @@ function M.new(opts)
     package.lspconfig_name =
         vim.tbl_get(package.mason, "spec", "neovim", "lspconfig")
     if package.lspconfig_name then
-        package.lspconfig = vim.tbl_get(vim.lsp.config, package.lspconfig_name)
+        package.lspconfig = vim.tbl_get(
+            vim.lsp.config --[[@as table<string, vim.lsp.Config?>]],
+            package.lspconfig_name
+        )
     end
 
     -- Determine filetypes that trigger installation
