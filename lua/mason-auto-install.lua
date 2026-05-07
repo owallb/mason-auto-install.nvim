@@ -89,9 +89,14 @@ end
 --- types are opened
 ---@param opts? MasonAutoInstall.Config Configuration options
 function M.setup(opts)
-    opts = opts or {}
+    if not require("mason").has_setup then
+        log.error(
+            "mason.setup() must be called before mason-auto-install.setup()"
+        )
+        return
+    end
 
-    -- Validate configuration before proceeding
+    opts = opts or {}
     local err = M.validate(opts)
     if err then
         log.error("Invalid setup options: %s", err)

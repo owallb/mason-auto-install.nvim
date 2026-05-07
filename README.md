@@ -16,6 +16,8 @@ Automatically install and update
 
 ## Installation
 
+`mason.setup()` must be called before `mason-auto-install.setup()`.
+
 Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 
 ```lua
