@@ -380,8 +380,9 @@ function M.new(opts)
         return nil, "expected string or table, got " .. type(opts)
     end
 
-    -- Support both opts[1] and opts.name for package name
-    if opts[1] and not opts.name then
+    if not opts[1] and not opts.name then
+        return nil, "missing name"
+    elseif opts[1] and not opts.name then
         opts.name = opts[1]
     end
 
@@ -393,7 +394,7 @@ function M.new(opts)
 
     -- Create base package structure
     local package = {
-        name = opts[1] or opts.name,
+        name = (opts[1] or opts.name) --[[@as -nil]],
         version = opts.version,
         dependencies = {},
         post_install_hooks = opts.post_install_hooks or {},
